@@ -1,0 +1,624 @@
+#! C:/Program Files/Nuke16.0v8/nuke-16.0.8.dll -nx
+version 16.0 v8
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="0" y="0" w="1535" h="882" screen="0">
+        <splitter orientation="1">
+            <split size="40"/>
+            <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                <page id="Toolbar.1"/>
+            </dock>
+            <split size="1335" stretch="1"/>
+            <splitter orientation="2">
+                <split size="493"/>
+                <dock id="" activePageId="Viewer.2">
+                    <page id="Viewer.1"/>
+                    <page id="Viewer.2"/>
+                    <page id="Viewer.3"/>
+                </dock>
+                <split size="346"/>
+                <dock id="" activePageId="DAG.1" focus="true">
+                    <page id="DAG.1"/>
+                    <page id="Curve Editor.1"/>
+                    <page id="DopeSheet.1"/>
+                </dock>
+            </splitter>
+            <split size="152"/>
+            <dock id="" activePageId="Properties.1">
+                <page id="Properties.1"/>
+                <page id="uk.co.thefoundry.backgroundrenderview.1"/>
+                <page id="Scenegraph.1"/>
+            </dock>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name C:/Users/sambi/Downloads/Assignment_1/Metrics_calculation.nk
+ frame 46
+ first_frame 47
+ last_frame 49
+ lock_range true
+ format "2048 1556 0 0 2048 1556 1 2K_Super_35(full-ap)"
+ proxy_type scale
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ colorManagement Nuke
+ workingSpaceLUT linear
+ monitorLut sRGB
+ monitorOutLUT rec709
+ int8Lut sRGB
+ int16Lut sRGB
+ logLut Cineon
+ floatLut linear
+}
+Viewer {
+ inputs 0
+ frame 46
+ frame_range 47-49
+ monitorOutNDISenderName "Nuke - Metrics_calculation - Viewer1"
+ monitorOutOutputTransform rec709
+ name Viewer1
+ xpos -370
+ ypos 23
+}
+Read {
+ inputs 0
+ file_type png
+ file C:/Users/sambi/Downloads/Assignment_1/Hula.Fore.ACKGT.#####.png
+ format "2048 1080 0 0 2048 1080 1 2K_DCP"
+ first 47
+ last 49
+ origfirst 47
+ origlast 49
+ origset true
+ name Read2
+ xpos -48
+ ypos -132
+}
+Shuffle2 {
+ fromInput1 {
+  {0}
+  B
+ }
+ out1 alpha
+ fromInput2 {
+  {0}
+  B
+ }
+ mappings "1 rgba.alpha 0 3 rgba.alpha 0 0"
+ name Shuffle2
+ xpos -42
+ ypos -5
+}
+set Nf4811700 [stack 0]
+Read {
+ inputs 0
+ file_type tiff
+ file C:/Users/sambi/Downloads/Assignment_1/output_Bayesian_Et_30_lam_100.####.tiff
+ format "2048 1080 0 0 2048 1080 1 2K_DCP"
+ first 47
+ last 49
+ origfirst 47
+ origlast 49
+ origset true
+ name Read1
+ xpos -267
+ ypos -127
+}
+Shuffle2 {
+ fromInput1 {
+  {0}
+  B
+ }
+ fromInput2 {
+  {0}
+  B
+ }
+ mappings "4 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.alpha 0 3 rgba.alpha 0 3 rgba.red 0 0 rgba.red 0 0"
+ name Shuffle1
+ xpos -239
+ ypos 4
+}
+set Nf4884500 [stack 0]
+BlinkScript {
+ inputs 2
+ recompileCount 1
+ ProgramGroup 1
+ KernelDescription "3 \"SSIM_XY\" iterate pixelWise b4371d15fe438dea60cb22f1548b4b531ea161aa09850cdacd8162eac1dd0997 3 \"P\" Read Point \"G\" Read Point \"out\" Write Point 0 0 0"
+ kernelSource "kernel SSIM_XY : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessPoint, eEdgeClamped> P;\n  Image<eRead, eAccessPoint, eEdgeClamped> G;\n  Image<eWrite> out;\n\n  void process(int2 p)\n  \{\n    float x = P().x;\n    float y = G().x;\n    out() = x * y;\n  \}\n\};"
+ rebuild ""
+ rebuild_finalise ""
+ name BlinkScript14
+ xpos 207
+ ypos 93
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "1024 540 0 0 1024 540 1 1024_540"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript26
+ xpos 207
+ ypos 153
+}
+BlinkScript {
+ recompileCount 6
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "512 270 0 0 512 270 1 512_270"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript27
+ xpos 207
+ ypos 215
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "256 135 0 0 256 135 1 256_135"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript28
+ xpos 207
+ ypos 267
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "128 67 0 0 128 67 1 128_67"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript29
+ xpos 207
+ ypos 319
+}
+BlinkScript {
+ recompileCount 6
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "64 33 0 0 64 33 1 64_33"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript30
+ xpos 207
+ ypos 373
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "32 16 0 0 32 16 1 32_16"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript31
+ xpos 207
+ ypos 444
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "16 8 0 0 16 8 1 16_8"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript32
+ xpos 208
+ ypos 524
+}
+BlinkScript {
+ recompileCount 6
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "8 4 0 0 8 4 1 8_4"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript33
+ xpos 208
+ ypos 583
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "4 2 0 0 4 2 1 4_2"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript34
+ xpos 208
+ ypos 647
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "2 1 0 0 2 1 1 2_1"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript35
+ xpos 208
+ ypos 727
+}
+BlinkScript {
+ recompileCount 6
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "1 1 0 0 1 1 1 1_1_new"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript36
+ xpos 208
+ ypos 811
+}
+push $Nf4811700
+push $Nf4884500
+BlinkScript {
+ inputs 2
+ recompileCount 1
+ ProgramGroup 1
+ KernelDescription "3 \"SSIM_Moments\" iterate pixelWise bf5711207fb9bc4a50e4b8c42ba6c39f1c333dc67782f38294b135e1b566f286 3 \"P\" Read Point \"G\" Read Point \"out\" Write Point 0 0 0"
+ kernelSource "kernel SSIM_Moments : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessPoint, eEdgeClamped> P;\n  Image<eRead, eAccessPoint, eEdgeClamped> G;\n  Image<eWrite> out;\n\n  void process(int2 p)\n  \{\n    float x = P().x; // pred matte in red\n    float y = G().x; // GT matte in red\n    out() = float4(x, y, x*x, y*y);\n  \}\n\};"
+ rebuild ""
+ rebuild_finalise ""
+ name BlinkScript13
+ xpos 41
+ ypos 94
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "1024 540 0 0 1024 540 1 1024_540"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript15
+ xpos 41
+ ypos 161
+}
+BlinkScript {
+ recompileCount 6
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "512 270 0 0 512 270 1 512_270"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript16
+ xpos 41
+ ypos 226
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "256 135 0 0 256 135 1 256_135"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript17
+ xpos 41
+ ypos 277
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "128 67 0 0 128 67 1 128_67"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript18
+ xpos 41
+ ypos 330
+}
+BlinkScript {
+ recompileCount 6
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "64 33 0 0 64 33 1 64_33"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript19
+ xpos 41
+ ypos 382
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "32 16 0 0 32 16 1 32_16"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript20
+ xpos 41
+ ypos 451
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "16 8 0 0 16 8 1 16_8"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript21
+ xpos 41
+ ypos 532
+}
+BlinkScript {
+ recompileCount 6
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "8 4 0 0 8 4 1 8_4"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript22
+ xpos 41
+ ypos 597
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "4 2 0 0 4 2 1 4_2"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript23
+ xpos 41
+ ypos 657
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "2 1 0 0 2 1 1 2_1"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript24
+ xpos 41
+ ypos 738
+}
+BlinkScript {
+ recompileCount 6
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "1 1 0 0 1 1 1 1_1_new"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript25
+ xpos 41
+ ypos 820
+}
+BlinkScript {
+ inputs 2
+ recompileCount 2
+ ProgramGroup 1
+ KernelDescription "3 \"SSIM_Final\" iterate pixelWise ec995e54f51f52b438a70d0d4c79943e9a5fc24b01112dce7d20e9f5a6be6f4e 3 \"M\" Read Point \"XY\" Read Point \"out\" Write Point 0 0 0"
+ kernelSource "kernel SSIM_Final : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessPoint, eEdgeClamped> M;   // 1x1: \[Ex,Ey,Ex2,Ey2]\n  Image<eRead, eAccessPoint, eEdgeClamped> XY;  // 1x1: Exy\n  Image<eWrite> out;\n\n  void process(int2 p)\n  \{\n    float4 m = M();    // m.x=Ex, m.y=Ey, m.z=Ex2, m.w=Ey2\n    float ex  = m.x;\n    float ey  = m.y;\n    float ex2 = m.z;\n    float ey2 = m.w;\n    float exy = XY().x;  // single-channel\n\n    float mux = ex;\n    float muy = ey;\n\n    float sigx2 = max(ex2 - mux*mux, 0.0f);\n    float sigy2 = max(ey2 - muy*muy, 0.0f);\n    float sigxy = exy - mux*muy;\n\n    // L=1 for mattes in \[0,1]\n    float C1 = 0.01f*0.01f;\n    float C2 = 0.03f*0.03f;\n\n    float num = (2.0f*mux*muy + C1) * (2.0f*sigxy + C2);\n    float den = (mux*mux + muy*muy + C1) * (sigx2 + sigy2 + C2);\n\n    out() = num / max(den, 1e-12f);\n  \}\n\};"
+ rebuild ""
+ rebuild_finalise ""
+ name BlinkScript37
+ xpos 121
+ ypos 912
+}
+Viewer {
+ frame 46
+ frame_range 47-49
+ monitorOutNDISenderName "Nuke - Metrics_calculation - Viewer3"
+ monitorOutOutputTransform rec709
+ name Viewer3
+ xpos 121
+ ypos 981
+}
+push $Nf4811700
+push $Nf4884500
+BlinkScript {
+ inputs 2
+ recompileCount 1
+ ProgramGroup 1
+ KernelDescription "3 \"SqError\" iterate pixelWise 53ea2c8080c312915a99453b807d9d02a467597de02f64a749b200b851d5545c 3 \"P\" Read Point \"G\" Read Point \"out\" Write Point 0 0 0"
+ kernelSource "kernel SqError : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessPoint, eEdgeClamped> P;\n  Image<eRead, eAccessPoint, eEdgeClamped> G;\n  Image<eWrite> out;\n\n  void process(int2 p)\n  \{\n    float d = P().x - G().x;   // red channel\n    out() = d*d;               // single channel\n  \}\n\};"
+ rebuild ""
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript1
+ xpos -138
+ ypos 94
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "1024 540 0 0 1024 540 1 1024_540"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript6
+ xpos -136
+ ypos 163
+}
+BlinkScript {
+ recompileCount 6
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "512 270 0 0 512 270 1 512_270"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript7
+ xpos -136
+ ypos 225
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "256 135 0 0 256 135 1 256_135"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript8
+ xpos -136
+ ypos 277
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "128 67 0 0 128 67 1 128_67"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript2
+ xpos -136
+ ypos 329
+}
+BlinkScript {
+ recompileCount 6
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "64 33 0 0 64 33 1 64_33"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript3
+ xpos -136
+ ypos 383
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "32 16 0 0 32 16 1 32_16"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript4
+ xpos -136
+ ypos 454
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "16 8 0 0 16 8 1 16_8"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript5
+ xpos -135
+ ypos 534
+}
+BlinkScript {
+ recompileCount 6
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "8 4 0 0 8 4 1 8_4"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript9
+ xpos -135
+ ypos 593
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "4 2 0 0 4 2 1 4_2"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript10
+ xpos -135
+ ypos 657
+}
+BlinkScript {
+ recompileCount 7
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "2 1 0 0 2 1 1 2_1"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript11
+ xpos -135
+ ypos 737
+}
+BlinkScript {
+ recompileCount 6
+ ProgramGroup 1
+ KernelDescription "3 \"ReduceMean2x\" iterate pixelWise a2fa6a4084adebdd62ccff2e60681d002b7ed81f7e04297534d7684c89a9dc2b 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+ kernelSource "kernel ReduceMean2x : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src;\n    Image<eWrite> dst;\n\n    void process(int2 p)\n    \{\n        int2 q = p * 2;\n\n        float4 a = src(q.x,     q.y    );\n        float4 b = src(q.x + 1, q.y    );\n        float4 c = src(q.x,     q.y + 1);\n        float4 d = src(q.x + 1, q.y + 1);\n\n        dst() = (a + b + c + d) * 0.25f;\n    \}\n\};"
+ rebuild ""
+ format "1 1 0 0 1 1 1 1_1_new"
+ specifiedFormat true
+ rebuild_finalise ""
+ name BlinkScript12
+ xpos -135
+ ypos 821
+}
+Viewer {
+ frame 46
+ frame_range 47-49
+ monitorOutNDISenderName "Nuke - Metrics_calculation - Viewer2"
+ monitorOutOutputTransform rec709
+ name Viewer2
+ selected true
+ xpos -135
+ ypos 910
+}

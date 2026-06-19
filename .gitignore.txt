@@ -1,0 +1,37 @@
+# OS files
+.DS_Store
+__MACOSX/
+Thumbs.db
+
+# Nuke temporary/autosave/cache files
+*.autosave
+*.tmp
+*.nk.autosave
+*.nk~
+.nuke/
+
+# Large media files - keep only small selected outputs
+*.mov
+*.mp4
+*.avi
+*.mkv
+*.exr
+*.dpx
+*.tif
+*.tiff
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Model/checkpoint files
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# Generated large outputs
+cache/
+renders/
+frames/
+temp/
